@@ -6,7 +6,8 @@ const getLatestBlock = sdk.blocks.getLatestBlock;
 export const ERROR_STRING = "------ ERROR ------";
 
 export function checkArguments(argv: string[]) {
-  if (argv.length < 4) {
+  const adapterArg = argv[2]
+  if (argv.length < 4 && (!adapterArg || !adapterArg.includes('/'))) {
     console.error(`Missing arguments, you need to provide the folder name of the adapter to test.
     Eg: yarn test volume uniswap`);
     process.exit(1);
@@ -143,10 +144,10 @@ export function printVolumes2(volumes: any[]) {
   }));
 
   console.log(sdk.util.tableToString(entries));
+}
 
-  function getLabel(key: string) {
-    return camelCaseToSpaces(key === "timestamp" ? "endTimestamp" : key);
-  }
+function getLabel(key: string) {
+  return camelCaseToSpaces(key === "timestamp" ? "endTimestamp" : key);
 }
 
 export function formatTimestampAsDate(timestamp: string) {
@@ -187,4 +188,27 @@ export function timestampLast(item: any): any {
   }
 
   return newItem;
+}
+
+export function printBreakdownFeesByLabel(breakdownByLabel: any) {
+  if (breakdownByLabel) {
+    console.log('')
+    console.log('')
+    console.info('FEES BREAKDOWN', '👇');
+    console.log('')
+    
+    const entries: any = {}
+    for (const dataKey of Object.values(['dailyFees', 'dailySupplySideRevenue', 'dailyRevenue', 'dailyHoldersRevenue'])) {
+      if (breakdownByLabel[dataKey]) {
+        for (const [label, value] of Object.entries(breakdownByLabel[dataKey])) {
+          entries[label] = entries[label] || { label: label };
+
+          const dataKeyLabel = getLabel(dataKey);
+          entries[label][dataKeyLabel] = entries[label][dataKeyLabel] ? entries[label][dataKeyLabel] + value : value;
+        }
+      }
+    }
+    
+    console.log(sdk.util.tableToString(Object.values(entries)));
+  }
 }

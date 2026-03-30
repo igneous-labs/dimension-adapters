@@ -25,7 +25,7 @@ async function fetch(options: FetchOptions) {
         options.getLogs({
             targets: filteredPoolsArray,
             eventAbi: swapEvent,
-            entireLog: true
+            onlyArgs: false,
         }),
         options.api.multiCall({
             calls: filteredPoolsArray,
@@ -69,6 +69,7 @@ const methodology = {
 
 const adapter : SimpleAdapter = {
     version: 2,
+    pullHourly: true,
     fetch,
     chains: [CHAIN.HYPERLIQUID],
     start: "2025-03-27",
